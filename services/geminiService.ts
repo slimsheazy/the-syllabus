@@ -8,9 +8,53 @@ const MODELS = {
   PRO: 'gemini-3-pro-preview',     
   IMAGE: 'gemini-2.5-flash-image',
   TTS: 'gemini-2.5-flash-preview-tts'
-};
+} as const;
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// --- Reusable Schema Definitions ---
+const PLANET_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    name: { type: Type.STRING },
+    degree: { type: Type.NUMBER },
+    sign: { type: Type.STRING },
+    isRetrograde: { type: Type.BOOLEAN }
+  },
+  required: ["name", "degree", "sign"]
+} as const;
+
+const ASPECT_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    p1: { type: Type.STRING },
+    p2: { type: Type.STRING },
+    type: { type: Type.STRING },
+    orb: { type: Type.NUMBER }
+  },
+  required: ["p1", "p2", "type", "orb"]
+} as const;
+
+const PLANETS_ARRAY_SCHEMA = {
+  type: Type.ARRAY,
+  items: PLANET_SCHEMA
+} as const;
+
+const ASPECTS_ARRAY_SCHEMA = {
+  type: Type.ARRAY,
+  items: ASPECT_SCHEMA
+} as const;
+
+const CHART_DATA_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    ascendant: { type: Type.NUMBER },
+    midheaven: { type: Type.NUMBER },
+    planets: PLANETS_ARRAY_SCHEMA,
+    aspects: ASPECTS_ARRAY_SCHEMA
+  },
+  required: ["ascendant", "planets", "aspects"]
+} as const;
 
 // --- Helper: Generic JSON Generator ---
 async function generateJson<T>(model: string, prompt: string, schema: any): Promise<T | null> {
@@ -31,7 +75,6 @@ async function generateJson<T>(model: string, prompt: string, schema: any): Prom
 }
 
 // --- Numerology Helpers (Local Calculation) ---
-
 const LETTER_MAP: Record<string, number> = {
   'a': 1, 'j': 1, 's': 1,
   'b': 2, 'k': 2, 't': 2,
@@ -44,47 +87,67 @@ const LETTER_MAP: Record<string, number> = {
   'i': 9, 'r': 9
 };
 
+// Optimized: Iterative instead of recursive
 function reduceNumber(num: number): number {
-  if (num === 11 || num === 22 || num === 33) return num;
-  if (num < 10) return num;
-  return reduceNumber(num.toString().split('').reduce((a, b) => a + parseInt(b), 0));
+  let current = num;
+  while (current >= 10 && current !== 11 && current !== 22 && current !== 33) {
+    let sum = 0;
+    while (current > 0) {
+      sum += current % 10;
+      current = Math.floor(current / 10);
+    }
+    current = sum;
+  }
+  return current;
 }
 
+// Optimized: Single pass through name string
 function calculateNumerology(name: string, birthDate: string) {
   // Life Path
-  const dateDigits = birthDate.replace(/[^0-9]/g, '').split('').map(Number);
-  const lifePath = reduceNumber(dateDigits.reduce((a, b) => a + b, 0));
-
-  // Destiny (Expression)
-  const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
-  let destinySum = 0;
-  for (const char of cleanName) {
-    destinySum += LETTER_MAP[char] || 0;
-  }
-  const destinyNumber = reduceNumber(destinySum);
-
-  // Soul Urge (Vowels) - Approximation (A E I O U)
-  let soulSum = 0;
-  for (const char of cleanName) {
-    if (['a','e','i','o','u'].includes(char)) {
-       soulSum += LETTER_MAP[char] || 0;
+  let dateSum = 0;
+  for (let i = 0; i < birthDate.length; i++) {
+    const digit = birthDate.charCodeAt(i) - 48; // '0' = 48
+    if (digit >= 0 && digit <= 9) {
+      dateSum += digit;
     }
   }
-  const soulUrge = reduceNumber(soulSum);
+  const lifePath = reduceNumber(dateSum);
 
-  return { lifePath, destinyNumber, soulUrge };
+  // Destiny (Expression) and Soul Urge in single pass
+  const cleanName = name.toLowerCase();
+  let destinySum = 0;
+  let soulSum = 0;
+  const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
+  
+  for (let i = 0; i < cleanName.length; i++) {
+    const char = cleanName[i];
+    if (char >= 'a' && char <= 'z') {
+      const value = LETTER_MAP[char] || 0;
+      destinySum += value;
+      if (VOWELS.has(char)) {
+        soulSum += value;
+      }
+    }
+  }
+
+  return {
+    lifePath,
+    destinyNumber: reduceNumber(destinySum),
+    soulUrge: reduceNumber(soulSum)
+  };
 }
 
 // --- Sigil Helper ---
+// Optimized: Use Set for O(1) vowel lookup
+const VOWELS_UPPER = new Set(['A', 'E', 'I', 'O', 'U']);
+
 function distillIntention(intention: string): string {
-  // 1. To Upper, remove non-alpha
   const clean = intention.toUpperCase().replace(/[^A-Z]/g, '');
-  // 2. Remove vowels (Austin Osman Spare method) and duplicates
-  const vowels = ['A', 'E', 'I', 'O', 'U'];
-  const uniqueConsonants = new Set();
+  const uniqueConsonants = new Set<string>();
   
-  for (const char of clean) {
-    if (!vowels.includes(char)) {
+  for (let i = 0; i < clean.length; i++) {
+    const char = clean[i];
+    if (!VOWELS_UPPER.has(char)) {
       uniqueConsonants.add(char);
     }
   }
@@ -94,56 +157,20 @@ function distillIntention(intention: string): string {
 // --- Services ---
 
 export const getHoraryAnalysis = async (question: string, lat: number, lng: number, timestamp: string) => {
-  const prompt = `
-    You are a precision Swiss Ephemeris Engine and Master Horary Astrologer. 
-    Cast a high-fidelity chart for the EXACT MOMENT: ${timestamp} at Latitude ${lat}, Longitude ${lng}.
-    
-    Technical Requirements:
-    1. Calculate planetary degrees (0-359.99) with decimal precision.
-    2. Identify the Ascendant and Midheaven (MC).
-    3. Compute all major aspects (Conjunction, Sextile, Square, Trine, Opposition) with exact orbs.
-    4. Analyze significators for: "${question}".
-    
-    Output in strictly validated JSON.
-  `;
+  const prompt = `You are a precision Swiss Ephemeris Engine and Master Horary Astrologer. Cast a high-fidelity chart for the EXACT MOMENT: ${timestamp} at Latitude ${lat}, Longitude ${lng}.
+
+Technical Requirements:
+1. Calculate planetary degrees (0-359.99) with decimal precision.
+2. Identify the Ascendant and Midheaven (MC).
+3. Compute all major aspects (Conjunction, Sextile, Square, Trine, Opposition) with exact orbs.
+4. Analyze significators for: "${question}".
+
+Output in strictly validated JSON.`;
 
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
     properties: {
-      chartData: {
-        type: Type.OBJECT,
-        properties: {
-          ascendant: { type: Type.NUMBER },
-          midheaven: { type: Type.NUMBER },
-          planets: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                degree: { type: Type.NUMBER },
-                sign: { type: Type.STRING },
-                isRetrograde: { type: Type.BOOLEAN }
-              },
-              required: ["name", "degree", "sign"]
-            }
-          },
-          aspects: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                p1: { type: Type.STRING },
-                p2: { type: Type.STRING },
-                type: { type: Type.STRING },
-                orb: { type: Type.NUMBER }
-              },
-              required: ["p1", "p2", "type", "orb"]
-            }
-          }
-        },
-        required: ["ascendant", "planets", "aspects"]
-      },
+      chartData: CHART_DATA_SCHEMA,
       judgment: { type: Type.STRING },
       technicalNotes: { type: Type.STRING },
       outcome: { type: Type.STRING }
@@ -153,12 +180,7 @@ export const getHoraryAnalysis = async (question: string, lat: number, lng: numb
 };
 
 export const getElectionalAnalysis = async (question: string, lat: number, lng: number) => {
-  const prompt = `
-    You are a high-precision Electional Astrologer and Ephemeris Engine. 
-    Scan the next 30 days from now (${new Date().toISOString()}) to identify the OPTIMAL temporal node for: "${question}".
-    Location: Lat ${lat}, Lng ${lng}.
-    Calculate exact positions and major aspects for the selected moment.
-  `;
+  const prompt = `You are a high-precision Electional Astrologer and Ephemeris Engine. Scan the next 30 days from now (${new Date().toISOString()}) to identify the OPTIMAL temporal node for: "${question}". Location: Lat ${lat}, Lng ${lng}. Calculate exact positions and major aspects for the selected moment.`;
 
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
@@ -168,31 +190,8 @@ export const getElectionalAnalysis = async (question: string, lat: number, lng: 
         type: Type.OBJECT,
         properties: {
           ascendant: { type: Type.NUMBER },
-          planets: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                degree: { type: Type.NUMBER },
-                sign: { type: Type.STRING }
-              },
-              required: ["name", "degree", "sign"]
-            }
-          },
-          aspects: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                p1: { type: Type.STRING },
-                p2: { type: Type.STRING },
-                type: { type: Type.STRING },
-                orb: { type: Type.NUMBER }
-              },
-              required: ["p1", "p2", "type", "orb"]
-            }
-          }
+          planets: PLANETS_ARRAY_SCHEMA,
+          aspects: ASPECTS_ARRAY_SCHEMA
         },
         required: ["ascendant", "planets", "aspects"]
       },
@@ -209,17 +208,15 @@ export const getNumerologyAnalysis = async (name: string, birthday: string) => {
   const { lifePath, destinyNumber, soulUrge } = calculateNumerology(name, birthday);
 
   // 2. Ask AI for interpretation based on these calculated numbers
-  const prompt = `
-    Provide an esoteric numerological interpretation for:
-    Subject: ${name}
-    Life Path: ${lifePath}
-    Destiny Number: ${destinyNumber}
-    Soul Urge: ${soulUrge}
-    
-    Provide a 'meaning' (synthesis of these numbers) and 'esotericInsight' (deeper spiritual implication).
-  `;
+  const prompt = `Provide an esoteric numerological interpretation for:
+Subject: ${name}
+Life Path: ${lifePath}
+Destiny Number: ${destinyNumber}
+Soul Urge: ${soulUrge}
 
-  const interpretation = await generateJson<{ meaning: string, esotericInsight: string }>(MODELS.PRO, prompt, {
+Provide a 'meaning' (synthesis of these numbers) and 'esotericInsight' (deeper spiritual implication).`;
+
+  const interpretation = await generateJson<{ meaning: string; esotericInsight: string }>(MODELS.PRO, prompt, {
     type: Type.OBJECT,
     properties: {
       meaning: { type: Type.STRING },
@@ -244,13 +241,11 @@ export const generateSigil = async (intention: string, feeling: string) => {
     // Fallback if distilled is empty
     const seed = distilled.length > 0 ? distilled : intention.toUpperCase().replace(/[^A-Z]/g, '');
 
-    const prompt = `
-      Create a raw, authentic chaos magic sigil based on the following letter forms: "${seed}".
-      Method: Deconstruct the letters and recombine their strokes into a single, fused, abstract glyph.
-      Style: Minimalist black ink on white paper. Hand-drawn aesthetic. High contrast.
-      No glowing effects. No background details/patterns. No text in the image. 
-      The result should be a simple, powerful, esoteric symbol.
-    `;
+    const prompt = `Create a raw, authentic chaos magic sigil based on the following letter forms: "${seed}".
+Method: Deconstruct the letters and recombine their strokes into a single, fused, abstract glyph.
+Style: Minimalist black ink on white paper. Hand-drawn aesthetic. High contrast.
+No glowing effects. No background details/patterns. No text in the image. 
+The result should be a simple, powerful, esoteric symbol.`;
     
     const response = await ai.models.generateContent({
       model: MODELS.IMAGE,
@@ -259,8 +254,13 @@ export const generateSigil = async (intention: string, feeling: string) => {
     });
     
     // Check for inline data (Base64)
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+    const parts = response.candidates?.[0]?.content?.parts;
+    if (parts) {
+      for (const part of parts) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
+      }
     }
     return null;
   } catch (error) {
@@ -295,10 +295,7 @@ export const getWordDefinition = async (word: string) => {
 };
 
 export const getBaziAnalysis = async (date: string, time: string) => {
-  const prompt = `
-    Calculate the Bazi (Four Pillars of Destiny) chart for: Date ${date}, Time ${time}. 
-    Ensure each pillar has a personalized 'personalExplanation' that describes its deep impact on the user's archetypal path.
-  `;
+  const prompt = `Calculate the Bazi (Four Pillars of Destiny) chart for: Date ${date}, Time ${time}. Ensure each pillar has a personalized 'personalExplanation' that describes its deep impact on the user's archetypal path.`;
 
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
@@ -338,18 +335,16 @@ export const getBaziAnalysis = async (date: string, time: string) => {
   });
 };
 
-export const getBiologicalDepreciation = async (metrics: { age: number, telomereMaintenance: number, systemicLoad: number }) => {
-  const prompt = `
-    Actuarial analysis (Gompertz-Makeham) for Subject: Age ${metrics.age}, Telomere Maintenance Score ${metrics.telomereMaintenance}/10, Systemic Load Score ${metrics.systemicLoad}/10.
-    
-    Generate a response for a layperson.
-    1. 'obsolescenceDate': The projected end date in MM/DD/YYYY format.
-    2. 'accuracyProbability': A percentage confidence.
-    3. 'actuarialReport': A simple, easy-to-understand explanation of why this date was projected based on their lifestyle (maintenance and load). Avoid complex jargon; focus on the impact of their choices.
-    4. 'depreciationMetrics': A short, punchy summary of the body's condition (e.g. "Moderate Wear", "High Efficiency").
-    
-    IMPORTANT: Return 'obsolescenceDate' strictly in MM/DD/YYYY format.
-  `;
+export const getBiologicalDepreciation = async (metrics: { age: number; telomereMaintenance: number; systemicLoad: number }) => {
+  const prompt = `Actuarial analysis (Gompertz-Makeham) for Subject: Age ${metrics.age}, Telomere Maintenance Score ${metrics.telomereMaintenance}/10, Systemic Load Score ${metrics.systemicLoad}/10.
+
+Generate a response for a layperson.
+1. 'obsolescenceDate': The projected end date in MM/DD/YYYY format.
+2. 'accuracyProbability': A percentage confidence.
+3. 'actuarialReport': A simple, easy-to-understand explanation of why this date was projected based on their lifestyle (maintenance and load). Avoid complex jargon; focus on the impact of their choices.
+4. 'depreciationMetrics': A short, punchy summary of the body's condition (e.g. "Moderate Wear", "High Efficiency").
+
+IMPORTANT: Return 'obsolescenceDate' strictly in MM/DD/YYYY format.`;
   
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
@@ -365,7 +360,7 @@ export const getBiologicalDepreciation = async (metrics: { age: number, telomere
 
 export const getFlyingStarAnalysis = async (period: number, facingDegree: number) => {
   const prompt = `Perform a Xuan Kong Flying Star (Xing Kong) spatial mapping for Construction Period ${period} and Facing Direction ${facingDegree} degrees.`;
-  
+
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
     properties: {
@@ -393,7 +388,7 @@ export const getFlyingStarAnalysis = async (period: number, facingDegree: number
 
 export const getPieDeconstruction = async (word: string) => {
   const prompt = `Perform a PIE (Proto-Indo-European) etymological deconstruction for: "${word}".`;
-  
+
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
     properties: {
@@ -408,12 +403,7 @@ export const getPieDeconstruction = async (word: string) => {
 };
 
 export const getColorPalette = async (input: string, mode: 'date' | 'vibe') => {
-  const prompt = `
-    Analyze the 'Elemental Density' and 'Vibrational Spectrum' for: "${input}" (${mode} mode). 
-    Generate an expansive 12-color design matrix. 
-    Organize the palette into 3 distinct layers: 'The Root' (Foundational essence), 'The Aether' (Shadow and hidden frequencies), and 'The Flare' (Aspirational and spiritual zenith).
-    Each layer must contain 4 specific hex colors.
-  `;
+  const prompt = `Analyze the 'Elemental Density' and 'Vibrational Spectrum' for: "${input}" (${mode} mode). Generate an expansive 12-color design matrix. Organize the palette into 3 distinct layers: 'The Root' (Foundational essence), 'The Aether' (Shadow and hidden frequencies), and 'The Flare' (Aspirational and spiritual zenith). Each layer must contain 4 specific hex colors.`;
 
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
@@ -439,10 +429,11 @@ export const getColorPalette = async (input: string, mode: 'date' | 'vibe') => {
   });
 };
 
-export const getTarotReading = async (cards: {name: string, isReversed: boolean}[], question: string) => {
-  const prompt = `Perform a professional tarot reading for: "${question}". Cards: ${cards.map(c => `${c.name} (${c.isReversed ? 'Reversed' : 'Upright'})`).join(', ')}.`;
+export const getTarotReading = async (cards: { name: string; isReversed: boolean }[], question: string) => {
+  const cardDescriptions = cards.map(c => `${c.name} (${c.isReversed ? 'Reversed' : 'Upright'})`).join(', ');
+  const prompt = `Perform a professional tarot reading for: "${question}". Cards: ${cardDescriptions}.`;
   
-  const result = await generateJson<{interpretation: string, guidance: string}>(MODELS.PRO, prompt, {
+  const result = await generateJson<{ interpretation: string; guidance: string }>(MODELS.PRO, prompt, {
     type: Type.OBJECT,
     properties: {
       interpretation: { type: Type.STRING },
@@ -454,9 +445,9 @@ export const getTarotReading = async (cards: {name: string, isReversed: boolean}
   return result || { interpretation: "Archetypes obscured.", guidance: "Seek clarity later." };
 };
 
-export const generateCosmicMadLib = async (inputs: { noun: string, verb: string, adjective: string, object: string, place: string }) => {
+export const generateCosmicMadLib = async (inputs: { noun: string; verb: string; adjective: string; object: string; place: string }) => {
   const prompt = `Create a 'Cosmic Mad-Lib' ritual workshop with these: Noun: ${inputs.noun}, Verb: ${inputs.verb}, Adjective: ${inputs.adjective}, Object: ${inputs.object}, Place: ${inputs.place}.`;
-  
+
   return generateJson(MODELS.FAST, prompt, {
     type: Type.OBJECT,
     properties: {
@@ -470,7 +461,7 @@ export const generateCosmicMadLib = async (inputs: { noun: string, verb: string,
 
 export const getFriendshipMatrix = async (subject1: string, subject2: string) => {
   const prompt = `Vibrational synastry for Subject Alpha: "${subject1}" and Subject Beta: "${subject2}".`;
-  
+
   return generateJson(MODELS.PRO, prompt, {
     type: Type.OBJECT,
     properties: {
