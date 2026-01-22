@@ -142,14 +142,14 @@ const NavigationOverlay: React.FC<{
 };
 
 const HomeView: React.FC<{ onEnter: () => void }> = ({ onEnter }) => (
-  <div className="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden bg-white/40">
-    <div className="z-10 max-w-5xl w-full text-center space-y-12">
+  <div className="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden">
+    <div className="relative z-30 max-w-5xl w-full text-center space-y-12">
       <div className="flex flex-col items-center gap-4">
-         <span className="handwritten text-3xl md:text-4xl text-marker-blue font-extrabold italic tracking-tight">an open syllabus of esoteric study</span>
+         <span className="handwritten text-3xl md:text-4xl text-marker-blue font-extrabold italic tracking-tight marker-bleed">an open syllabus of esoteric study</span>
          <div className="w-64 h-2 bg-marker-black marker-border" />
       </div>
 
-      <h1 className="title-main font-black text-marker-black">the syllabus</h1>
+      <h1 className="title-main font-black text-marker-black marker-bleed">the syllabus</h1>
       
       <div className="py-12">
         <button onClick={onEnter} className="brutalist-button px-16 py-6 text-3xl md:text-4xl">
@@ -158,7 +158,7 @@ const HomeView: React.FC<{ onEnter: () => void }> = ({ onEnter }) => (
       </div>
     </div>
     
-    <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end handwritten text-xl text-marker-black/60 font-black italic uppercase tracking-widest">
+    <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end handwritten text-xl text-marker-black/80 font-black italic uppercase tracking-widest z-30">
       <span>Knowledge is free to all</span>
       <span>Open Repository</span>
     </div>
