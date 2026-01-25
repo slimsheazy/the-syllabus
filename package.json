@@ -13,7 +13,9 @@
     "react-dom": "^19.2.3",
     "@google/genai": "1.38.0",
     "zustand": "^5.0.10",
-    "sql.js": "1.13.0"
+    "sql.js": "1.13.0",
+    "leaflet": "1.9.4",
+    "react-leaflet": "5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -3,12 +3,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>the syllabus | esoteric archive</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="the syllabus">
+  
+  <!-- Favicon: Black with White Star in Top Left -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='black'/%3E%3Cpolygon points='100,50 115,90 160,90 125,115 140,160 100,135 60,160 75,115 40,90 85,90' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='black'/%3E%3Cpolygon points='100,50 115,90 160,90 125,115 140,160 100,135 60,160 75,115 40,90 85,90' fill='white'/%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Nerko+One&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Nerko+One&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -24,8 +38,10 @@
             'marker-purple': 'var(--marker-purple)',
             'marker-teal': 'var(--marker-teal)',
           },
-          fontSize: {
-            'xxs': '0.75rem',
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            marker: ['Nerko One', 'cursive'],
+            mono: ['JetBrains Mono', 'monospace'],
           }
         }
       }
@@ -35,33 +51,33 @@
   <style>
     /* --- Variables --- */
     :root {
-      /* Default (Light / Day) - Classic Dry Erase Marker Colors */
-      --wb-bg: #f8f9fa;
-      --wb-surface-rgb: 248 249 250;
+      /* Default (Light / Day) */
+      --wb-bg: #fdfbf7; /* Warm paper white */
+      --wb-surface-rgb: 255 255 255;
 
-      --marker-black: #1a1a1a;
-      --marker-blue: #0066cc;
-      --marker-red: #cc0000;
-      --marker-green: #009900;
-      --marker-purple: #6600cc;
-      --marker-teal: #0099cc;
+      --marker-black: #1e293b;
+      --marker-blue: #2563eb;
+      --marker-red: #dc2626;
+      --marker-green: #16a34a;
+      --marker-purple: #7c3aed;
+      --marker-teal: #0d9488;
       
-      --button-shadow: #1a1a1a;
+      --button-shadow: rgba(30, 41, 59, 0.2);
     }
 
     /* Eclipse Mode (Dark / Night) */
     html.eclipse-mode {
-      --wb-bg: #1a1a1a;
-      --wb-surface-rgb: 26 26 26;
+      --wb-bg: #1e1e1e;
+      --wb-surface-rgb: 40 40 45;
 
-      --marker-black: #e8e8e8;
-      --marker-blue: #4da6ff;
-      --marker-red: #ff4d4d;
-      --marker-green: #4dff4d;
-      --marker-purple: #b366ff;
-      --marker-teal: #4dd4ff;
+      --marker-black: #f1f5f9;
+      --marker-blue: #60a5fa;
+      --marker-red: #f87171;
+      --marker-green: #4ade80;
+      --marker-purple: #c084fc;
+      --marker-teal: #2dd4bf;
       
-      --button-shadow: #4da6ff;
+      --button-shadow: rgba(0, 0, 0, 0.5);
     }
 
     /* --- Reset & Base --- */
@@ -69,6 +85,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
 
     body {
@@ -76,56 +93,34 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f5f5f5;
-      font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+      background: #0f172a; /* Clean dark slate background */
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       color: var(--marker-black);
       overflow: hidden;
     }
 
     /* --- Layout / Scene --- */
     .scene {
-      perspective: 1000px;
       width: 100vw;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      transform: scale(0.85);
+      padding: 0.5rem; /* Reduced padding for mobile optimization */
+    }
+
+    @media (min-width: 768px) {
+      .scene {
+        padding: 1.5rem;
+      }
     }
 
     .whiteboard-wrapper {
       position: relative;
-      width: 98vw;
-      height: 96vh;
-      transform: rotateX(12deg) rotateY(-4deg) rotateZ(-0.5deg) translateZ(0);
-      transform-style: preserve-3d;
-      transition: transform 0.8s cubic-bezier(0.2, 0, 0.2, 1);
-    }
-
-    /* Whiteboard Frame - Subtle and Light */
-    .whiteboard-wrapper::before {
-      content: "";
-      position: absolute;
-      inset: -8px;
-      background: linear-gradient(135deg, #e8e8e8 0%, #f0f0f0 50%, #e8e8e8 100%);
-      border-radius: 16px;
-      z-index: -1;
-      box-shadow: 
-        0 80px 160px rgba(0, 0, 0, 0.15),
-        inset 0 2px 4px rgba(255, 255, 255, 0.5),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.05);
-      transform: translateZ(-10px);
-    }
-
-    .whiteboard-wrapper::after {
-      content: "";
-      position: absolute;
-      inset: -4px;
-      background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
-      border-radius: 14px;
-      z-index: -1;
-      transform: translateZ(-5px);
-      opacity: 0.8;
+      width: 100%;
+      height: 100%;
+      max-width: 1600px;
+      /* Removed 3D transform for a classic flat look */
     }
 
     /* --- Component: Whiteboard --- */
@@ -133,276 +128,139 @@
       position: relative;
       width: 100%;
       height: 100%;
-      background: 
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 24px,
-          rgba(0, 0, 0, 0.02) 24px,
-          rgba(0, 0, 0, 0.02) 25px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 24px,
-          rgba(0, 0, 0, 0.02) 24px,
-          rgba(0, 0, 0, 0.02) 25px
-        ),
-        var(--wb-bg);
+      background: var(--wb-bg);
       border-radius: 12px;
-      box-shadow:
-        0 80px 160px rgba(0, 0, 0, 0.3),
-        0 30px 60px rgba(0, 0, 0, 0.2),
-        0 0 0 2px rgba(0, 0, 0, 0.1),
-        inset 0 2px 4px rgba(255, 255, 255, 0.1),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
       overflow: hidden;
-      transform: translateZ(30px);
       display: flex;
       flex-direction: column;
-      transition: background-color 0.5s ease, box-shadow 0.5s ease;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      transition: background-color 0.4s ease;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     
     html.eclipse-mode .whiteboard {
-      background: 
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 24px,
-          rgba(255, 255, 255, 0.01) 24px,
-          rgba(255, 255, 255, 0.01) 25px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 24px,
-          rgba(255, 255, 255, 0.01) 24px,
-          rgba(255, 255, 255, 0.01) 25px
-        ),
-        var(--wb-bg);
-      box-shadow:
-        0 60px 120px rgba(0, 0, 0, 0.8),
-        0 20px 40px rgba(0, 0, 0, 0.5),
-        0 0 0 2px rgba(255, 255, 255, 0.05),
-        inset 0 2px 4px rgba(255, 255, 255, 0.02),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
     }
 
-    /* Glossy Overlay - Whiteboard Shine */
-    .whiteboard::before {
-      content: "";
-      position: absolute;
-      inset: -100%;
-      background: 
-        linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.15) 0%,
-          rgba(255, 255, 255, 0.05) 25%,
-          transparent 50%,
-          rgba(255, 255, 255, 0.03) 75%,
-          rgba(255, 255, 255, 0.1) 100%
-        ),
-        radial-gradient(
-          ellipse 80% 50% at 30% 20%,
-          rgba(255, 255, 255, 0.2) 0%,
-          transparent 50%
-        );
-      opacity: 0.4;
-      pointer-events: none;
-      z-index: 1;
-      mix-blend-mode: overlay;
-      animation: shine 8s ease-in-out infinite;
-    }
-    
-    @keyframes shine {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(2%, 2%) rotate(0.5deg); }
-    }
-    
-    html.eclipse-mode .whiteboard::before {
-      opacity: 0.15;
-    }
-
-    /* Marker Smudges & Imperfections */
+    /* Vignette - Subtler */
     .whiteboard::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: 
-        radial-gradient(circle at 15% 20%, rgba(0, 102, 204, 0.03) 0%, transparent 15%),
-        radial-gradient(circle at 85% 30%, rgba(204, 0, 0, 0.02) 0%, transparent 12%),
-        radial-gradient(circle at 40% 80%, rgba(0, 153, 0, 0.02) 0%, transparent 10%),
-        radial-gradient(circle at 70% 60%, rgba(102, 0, 204, 0.015) 0%, transparent 8%),
-        radial-gradient(circle at 25% 70%, rgba(0, 102, 204, 0.02) 0%, transparent 10%);
+      background: radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.03) 100%);
       pointer-events: none;
-      z-index: 2;
+      z-index: 51;
       border-radius: 12px;
-    }
-    
-    html.eclipse-mode .whiteboard::after {
-      background: 
-        radial-gradient(circle at 15% 20%, rgba(77, 166, 255, 0.05) 0%, transparent 15%),
-        radial-gradient(circle at 85% 30%, rgba(255, 77, 77, 0.03) 0%, transparent 12%),
-        radial-gradient(circle at 40% 80%, rgba(77, 255, 77, 0.03) 0%, transparent 10%);
     }
 
     #root {
       position: relative;
-      z-index: 20;
+      z-index: 10;
       width: 100%;
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
     }
 
-    /* Custom Scrollbar - Marker Style */
+    /* --- Typography & Utils --- */
+    h1, h2, h3, h4, h5, h6, .heading-marker {
+      font-family: 'Nerko One', cursive;
+      letter-spacing: 0.02em;
+    }
+
+    .handwritten { 
+      font-family: 'Inter', sans-serif; 
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .title-main {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      color: var(--marker-black);
+      line-height: 1;
+      text-transform: lowercase;
+      font-family: 'Nerko One', cursive;
+    }
+
+    /* Refined Marker Border - Cleaner */
+    .marker-border {
+      border: 2px solid var(--marker-black);
+      border-radius: 6px; /* Clean rounded corner */
+      /* Removed the wobbly radius for a 'classic' look */
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Refined Button */
+    .brutalist-button {
+      background: rgb(var(--wb-surface-rgb));
+      color: var(--marker-black);
+      padding: 0.75rem 1.5rem;
+      font-family: 'Nerko One', cursive;
+      font-size: 1.25rem;
+      border: 2px solid var(--marker-black);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      box-shadow: 2px 3px 0px var(--button-shadow); /* Tighter shadow */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brutalist-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 3px 5px 0px var(--button-shadow);
+    }
+    
+    .brutalist-button:active {
+      transform: translateY(1px);
+      box-shadow: 1px 1px 0px var(--button-shadow);
+    }
+    
+    .brutalist-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Prevent iOS zoom on focus by ensuring font size is >= 16px */
+    input, textarea, select {
+        color: var(--marker-black);
+        font-family: 'Nerko One', cursive; 
+        font-size: 16px; /* Base size for mobile */
+    }
+    
+    @media (min-width: 768px) {
+        input, textarea, select {
+            font-size: 1.25rem; /* Larger on desktop */
+        }
+    }
+
+    input::placeholder, textarea::placeholder {
+        color: var(--marker-black);
+        opacity: 0.3;
+        font-family: 'Inter', sans-serif; 
+    }
+    
+    /* Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
-      width: 12px;
+      width: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
       background: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: var(--marker-blue);
-      border-radius: 6px;
-      opacity: 0.3;
+      background: rgba(15, 23, 42, 0.1);
+      border-radius: 10px;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      opacity: 0.5;
-    }
-
-    /* --- Typography & Utils --- */
-    h1, .heading-marker {
-      font-family: 'Nerko One', cursive;
-      letter-spacing: -0.01em;
-      text-shadow: 
-        0 1px 0 rgba(0, 0, 0, 0.1),
-        0 2px 2px rgba(0, 0, 0, 0.05);
-    }
-
-    .handwritten { 
-      font-family: 'Caveat Brush', cursive;
-      font-weight: 400;
-      letter-spacing: 0.02em;
-    }
-
-    .title-main {
-      font-size: clamp(4rem, 12vw, 10rem);
-      color: var(--marker-black);
-      line-height: 0.85;
-      text-transform: lowercase;
-      font-family: 'Nerko One', cursive;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-    }
-
-    /* Marker-like text effects */
-    .marker-text {
-      position: relative;
-      display: inline-block;
-    }
-
-    .marker-text::after {
-      content: attr(data-text);
-      position: absolute;
-      top: 0;
-      left: 0;
-      color: inherit;
-      opacity: 0.15;
-      filter: blur(2px);
-      z-index: -1;
-      transform: translate(1px, 1px);
-    }
-
-    .marker-border {
-      border: 3px solid var(--marker-black);
-      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      transition: border-color 0.5s ease;
-      box-shadow: 
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-        0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .brutalist-button {
-      background: rgb(var(--wb-surface-rgb));
-      color: var(--marker-black);
-      padding: 1rem 2rem;
-      font-family: 'Caveat Brush', cursive;
-      font-size: 1.75rem;
-      border: 3px solid var(--marker-black);
-      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      cursor: pointer;
-      box-shadow: 
-        4px 5px 0px var(--button-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      z-index: 60;
-      position: relative;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .brutalist-button::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.1) 0%,
-        transparent 50%,
-        rgba(0, 0, 0, 0.05) 100%
-      );
-      pointer-events: none;
-    }
-
-    .brutalist-button:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 
-        6px 8px 0px var(--button-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .brutalist-button:active {
-      transform: translateY(-1px) scale(1);
-      box-shadow: 
-        2px 3px 0px var(--button-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-    
-    /* Ensure inputs inherit text color correctly in dark mode */
-    input, textarea {
-      color: var(--marker-black);
-      font-family: 'Caveat Brush', cursive;
-      font-size: 1.25rem;
-      background: rgba(255, 255, 255, 0.5);
-      border: 2px solid var(--marker-black);
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-    }
-    input::placeholder, textarea::placeholder {
-      color: var(--marker-black);
-      opacity: 0.4;
-    }
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--marker-blue);
-      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    /* Marker color classes for text */
-    .text-marker-blue { color: var(--marker-blue); }
-    .text-marker-red { color: var(--marker-red); }
-    .text-marker-green { color: var(--marker-green); }
-    .text-marker-purple { color: var(--marker-purple); }
-    .text-marker-teal { color: var(--marker-teal); }
-    .text-marker-black { color: var(--marker-black); }
-
-    /* Subtle marker bleed effect */
-    .marker-bleed {
-      text-shadow: 
-        0 0 2px currentColor,
-        0 1px 3px rgba(0, 0, 0, 0.1);
+    html.eclipse-mode .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
     }
   </style>
 
@@ -416,6 +274,8 @@
     "zustand": "https://esm.sh/zustand@5.0.10?external=react",
     "zustand/middleware": "https://esm.sh/zustand@5.0.10/middleware?external=react",
     "sql.js": "https://esm.sh/sql.js@1.13.0",
+    "leaflet": "https://esm.sh/leaflet@1.9.4",
+    "react-leaflet": "https://esm.sh/react-leaflet@5.0.0?external=react,react-dom,leaflet",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "zustand/": "https://esm.sh/zustand@^5.0.10/"

@@ -43,8 +43,8 @@ const ColorPaletteTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="w-full flex flex-col xl:flex-row gap-16 items-start">
         <div className="w-full xl:w-[450px] space-y-12 xl:sticky xl:top-20">
            <header className="space-y-4">
-             <h2 className="heading-marker text-8xl text-marker-blue lowercase leading-none">Zodiacal Palette</h2>
-             <p className="handwritten text-2xl text-marker-blue font-black uppercase tracking-widest">Chromatic mapping of energy</p>
+             <h2 className="heading-marker text-8xl text-marker-blue lowercase leading-none"><GlossaryTerm word="Zodiac">Zodiacal</GlossaryTerm> Palette</h2>
+             <p className="handwritten text-2xl text-marker-blue font-black uppercase tracking-widest"><GlossaryTerm word="Chromatic">Chromatic</GlossaryTerm> mapping of energy</p>
              <div className="w-32 h-2 bg-marker-blue/20 marker-border"></div>
            </header>
            
@@ -104,7 +104,7 @@ const ColorPaletteTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <div className="w-32 h-32 border-8 border-marker-blue/10 rounded-full"></div>
                   <div className="absolute inset-0 w-32 h-32 border-8 border-marker-blue border-t-transparent animate-spin rounded-full"></div>
                 </div>
-                <span className="handwritten text-4xl text-marker-blue font-black animate-pulse italic uppercase tracking-widest">Analyzing Chromatic Density...</span>
+                <span className="handwritten text-4xl text-marker-blue font-black animate-pulse italic uppercase tracking-widest">Analyzing <GlossaryTerm word="Density">Chromatic Density</GlossaryTerm>...</span>
              </div>
            ) : result ? (
              <div className="w-full space-y-20 animate-in fade-in slide-in-from-bottom-8 duration-1000 pb-32">
@@ -112,12 +112,12 @@ const ColorPaletteTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {/* Palette Summary */}
                 <div className="p-12 marker-border border-marker-blue bg-white shadow-2xl space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-2 h-full bg-marker-blue"></div>
-                  <div className="handwritten text-sm font-black uppercase tracking-[0.4em] text-marker-blue">Spectrum Analysis Report</div>
+                  <div className="handwritten text-sm font-black uppercase tracking-[0.4em] text-marker-blue"><GlossaryTerm word="Spectrum">Spectrum</GlossaryTerm> Analysis Report</div>
                   <p className="handwritten text-4xl italic text-marker-black font-black leading-relaxed">
                     "{result.analysis}"
                   </p>
                   <div className="flex items-center gap-6 pt-4 border-t-4 border-marker-black/5">
-                    <span className="handwritten text-xl font-black text-marker-red uppercase tracking-widest">Elemental Gap:</span>
+                    <span className="handwritten text-xl font-black text-marker-red uppercase tracking-widest"><GlossaryTerm word="Elemental">Elemental</GlossaryTerm> Gap:</span>
                     <span className="heading-marker text-5xl text-marker-black lowercase">{result.deficiency}</span>
                   </div>
                 </div>

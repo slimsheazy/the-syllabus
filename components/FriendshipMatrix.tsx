@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { getFriendshipMatrix } from '../services/geminiService';
+import { GlossaryTerm } from './GlossaryEngine';
 
 const FriendshipMatrix: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [subject1, setSubject1] = useState('');
@@ -27,8 +28,8 @@ const FriendshipMatrix: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       
       <div className="w-full space-y-16">
         <header className="text-center space-y-2">
-          <h2 className="heading-marker text-7xl text-marker-blue lowercase">Friendship Matrix</h2>
-          <p className="handwritten text-xl text-marker-blue opacity-60">Compatibility Report</p>
+          <h2 className="heading-marker text-7xl text-marker-blue lowercase">Friendship <GlossaryTerm word="Matrix">Matrix</GlossaryTerm></h2>
+          <p className="handwritten text-xl text-marker-blue opacity-60"><GlossaryTerm word="Compatibility">Compatibility</GlossaryTerm> & <GlossaryTerm word="Synastry">Synastry</GlossaryTerm> Report</p>
           <div className="w-full h-px bg-marker-black/10 marker-border mt-8"></div>
         </header>
 
@@ -39,7 +40,7 @@ const FriendshipMatrix: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <input 
                 type="text" 
                 placeholder="Name or identifier"
-                className="w-full p-8 text-marker-black text-3xl shadow-sm text-center italic"
+                className="w-full p-8 text-marker-black text-3xl shadow-sm text-center italic bg-white/50 border-2 border-marker-black/5 rounded-xl focus:border-marker-blue focus:outline-none transition-all placeholder:text-marker-black/20"
                 value={subject1}
                 onChange={(e) => setSubject1(e.target.value)}
               />
@@ -50,7 +51,7 @@ const FriendshipMatrix: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <input 
                 type="text" 
                 placeholder="Name or identifier"
-                className="w-full p-8 text-marker-black text-3xl shadow-sm text-center italic"
+                className="w-full p-8 text-marker-black text-3xl shadow-sm text-center italic bg-white/50 border-2 border-marker-black/5 rounded-xl focus:border-marker-blue focus:outline-none transition-all placeholder:text-marker-black/20"
                 value={subject2}
                 onChange={(e) => setSubject2(e.target.value)}
               />
@@ -70,7 +71,7 @@ const FriendshipMatrix: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-8">
                <div className="w-20 h-20 border-4 border-marker-blue border-t-transparent animate-spin rounded-full"></div>
-               <span className="handwritten text-xl text-marker-blue animate-pulse italic">Analyzing Connection...</span>
+               <span className="handwritten text-xl text-marker-blue animate-pulse italic">Analyzing <GlossaryTerm word="Connection">Connection</GlossaryTerm>...</span>
             </div>
           )}
 
@@ -86,11 +87,11 @@ const FriendshipMatrix: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="p-10 marker-border border-marker-blue bg-white/40 shadow-xl">
-                     <span className="handwritten text-xs text-marker-blue font-bold uppercase tracking-widest block mb-6 italic">Frequency Match</span>
+                     <span className="handwritten text-xs text-marker-blue font-bold uppercase tracking-widest block mb-6 italic"><GlossaryTerm word="Frequency">Frequency</GlossaryTerm> Match</span>
                      <p className="handwritten text-2xl italic text-marker-black/80 leading-relaxed">"{result.vibrationalMatch}"</p>
                   </div>
                   <div className="p-10 marker-border border-marker-black bg-white/40 shadow-xl">
-                     <span className="handwritten text-xs text-marker-black opacity-40 uppercase tracking-widest block mb-6 italic">Final Analysis</span>
+                     <span className="handwritten text-xs text-marker-black opacity-40 uppercase tracking-widest block mb-6 italic">Final <GlossaryTerm word="Analysis">Analysis</GlossaryTerm></span>
                      <p className="heading-marker text-3xl text-marker-black lowercase">{result.analysis}</p>
                   </div>
                </div>

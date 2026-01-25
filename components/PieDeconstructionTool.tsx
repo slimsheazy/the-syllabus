@@ -36,8 +36,8 @@ const PieDeconstructionTool: React.FC<{ onBack: () => void }> = ({ onBack }) => 
       <div className="w-full flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
         <div className="flex-1 w-full space-y-12">
            <header className="space-y-2">
-             <h2 className="heading-marker text-6xl text-marker-blue lowercase">Root Analysis</h2>
-             <p className="handwritten text-xl text-marker-blue opacity-60">Tracing the semantic trace</p>
+             <h2 className="heading-marker text-6xl text-marker-blue lowercase"><GlossaryTerm word="Root">Root Analysis</GlossaryTerm></h2>
+             <p className="handwritten text-xl text-marker-blue opacity-60">Tracing the <GlossaryTerm word="Semantic">semantic</GlossaryTerm> trace</p>
            </header>
            
            <div className="space-y-10">
@@ -78,17 +78,17 @@ const PieDeconstructionTool: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                 </div>
 
                 <div className="p-8 md:p-12 marker-border border-marker-black bg-white/40 shadow-xl relative group">
-                   <div className="absolute top-4 right-4 handwritten text-sm text-marker-red font-bold uppercase tracking-widest">Primary Root</div>
+                   <div className="absolute top-4 right-4 handwritten text-sm text-marker-red font-bold uppercase tracking-widest"><GlossaryTerm word="Root">Primary Root</GlossaryTerm></div>
                    <div className="handwritten text-sm text-marker-black/30 uppercase mb-2 italic">Ancient Form</div>
                    <div className="text-7xl md:text-8xl heading-marker text-marker-black leading-none mb-6 group-hover:scale-105 transition-transform">*{result.pieRoot}</div>
                    <div className="p-6 marker-border border-marker-blue border-opacity-10 bg-white/30">
-                      <span className="handwritten text-sm text-marker-blue font-bold uppercase tracking-widest block mb-2 italic">Original Intent</span>
+                      <span className="handwritten text-sm text-marker-blue font-bold uppercase tracking-widest block mb-2 italic"><GlossaryTerm word="Origin">Original Intent</GlossaryTerm></span>
                       <p className="handwritten text-2xl md:text-3xl text-marker-black/80 italic">"{result.rootMeaning}"</p>
                    </div>
                 </div>
 
                 <div className="space-y-6">
-                   <div className="handwritten text-sm text-marker-black opacity-40 uppercase tracking-widest text-center italic">Semantic Evolution</div>
+                   <div className="handwritten text-sm text-marker-black opacity-40 uppercase tracking-widest text-center italic"><GlossaryTerm word="Etymology">Semantic Evolution</GlossaryTerm></div>
                    <div className="flex flex-col gap-6 relative">
                       {result.semanticTrace.map((step: string, i: number) => (
                         <div key={i} className="flex gap-4 md:gap-6 items-center group">

@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { getBiologicalDepreciation } from '../services/geminiService';
 import { logCalculation } from '../services/dbService';
 import { useSyllabusStore } from '../store';
+import { GlossaryTerm } from './GlossaryEngine';
 
 // --- Questionnaire Data ---
 
@@ -163,7 +164,7 @@ const BioCalcTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="w-full flex flex-col lg:flex-row gap-16 items-start">
         <div className="flex-1 w-full space-y-12">
            <header className="space-y-2">
-             <h2 className="heading-marker text-6xl text-marker-red lowercase">Vitality Gauge</h2>
+             <h2 className="heading-marker text-6xl text-marker-red lowercase"><GlossaryTerm word="Vitality">Vitality</GlossaryTerm> Gauge</h2>
              <p className="handwritten text-lg text-marker-red opacity-60">Lifespan & Health Projection</p>
            </header>
            

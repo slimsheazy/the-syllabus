@@ -7,6 +7,7 @@ import { ReadAloudButton } from './ReadAloudButton';
 const NumerologyTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
+  const [system, setSystem] = useState<'pythagorean' | 'chaldean'>('pythagorean');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -14,7 +15,7 @@ const NumerologyTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     if (!name || !birthday) return;
     setLoading(true);
     setResult(null);
-    const analysis = await getNumerologyAnalysis(name, birthday);
+    const analysis = await getNumerologyAnalysis(name, birthday, system);
     setResult(analysis);
     setLoading(false);
   };
@@ -31,11 +32,33 @@ const NumerologyTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="w-full flex flex-col lg:flex-row gap-16 items-start">
         <div className="flex-1 w-full space-y-12">
            <header className="space-y-2">
-             <h2 className="heading-marker text-6xl text-marker-teal lowercase">Life Path Reader</h2>
-             <p className="handwritten text-lg text-marker-teal opacity-60">Numerology & Purpose</p>
+             <h2 className="heading-marker text-6xl text-marker-teal lowercase"><GlossaryTerm word="Life Path">Life Path</GlossaryTerm> Reader</h2>
+             <p className="handwritten text-lg text-marker-teal opacity-60"><GlossaryTerm word="Numerology">Numerology</GlossaryTerm> & Purpose</p>
            </header>
            
            <div className="space-y-8">
+             <div className="space-y-2">
+                <label className="handwritten text-sm text-marker-black opacity-40 block ml-2 uppercase tracking-widest">System Protocol</label>
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => setSystem('pythagorean')}
+                    className={`flex-1 py-3 px-4 marker-border transition-all handwritten text-sm font-bold uppercase tracking-widest ${
+                      system === 'pythagorean' ? 'bg-marker-teal text-white border-marker-teal' : 'bg-white border-marker-black/20 text-marker-black/60 hover:text-marker-black hover:border-marker-black/60'
+                    }`}
+                  >
+                    Pythagorean
+                  </button>
+                  <button 
+                    onClick={() => setSystem('chaldean')}
+                    className={`flex-1 py-3 px-4 marker-border transition-all handwritten text-sm font-bold uppercase tracking-widest ${
+                      system === 'chaldean' ? 'bg-marker-teal text-white border-marker-teal' : 'bg-white border-marker-black/20 text-marker-black/60 hover:text-marker-black hover:border-marker-black/60'
+                    }`}
+                  >
+                    Chaldean
+                  </button>
+                </div>
+             </div>
+
              <div className="space-y-2">
                <label className="handwritten text-sm text-marker-black opacity-40 block ml-2">Full Name</label>
                <input 
@@ -77,14 +100,22 @@ const NumerologyTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
            {result ? (
              <div className="w-full space-y-10 animate-in fade-in duration-500 pb-16">
+                <div className="flex justify-end">
+                   <span className="px-3 py-1 bg-marker-teal/10 text-marker-teal text-xs font-bold uppercase tracking-widest rounded-full border border-marker-teal/20">
+                     {result.systemComparison}
+                   </span>
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { label: 'Life Path', key: 'lifePath' },
-                    { label: 'Destiny', key: 'destinyNumber' },
-                    { label: 'Soul Urge', key: 'soulUrge' }
+                    { label: 'Life Path', key: 'lifePath', glossary: 'Life Path' },
+                    { label: 'Destiny', key: 'destinyNumber', glossary: 'Destiny Number' },
+                    { label: 'Soul Urge', key: 'soulUrge', glossary: 'Soul Urge' }
                   ].map((item, i) => (
                     <div key={item.key} className="bg-white/40 p-6 text-center marker-border border-marker-black">
-                       <span className="handwritten text-[10px] text-marker-black/30 mb-2 block uppercase">{item.label}</span>
+                       <span className="handwritten text-[10px] text-marker-black/30 mb-2 block uppercase">
+                         <GlossaryTerm word={item.glossary}>{item.label}</GlossaryTerm>
+                       </span>
                        <span className={`heading-marker text-6xl ${i === 1 ? 'text-marker-red' : 'text-marker-black'}`}>{result[item.key]}</span>
                     </div>
                   ))}

@@ -22,7 +22,7 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start py-32 px-4 md:px-12 relative max-w-7xl mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-start py-20 md:py-32 px-4 md:px-12 relative max-w-7xl mx-auto">
       <button 
         onClick={onBack} 
         className="fixed top-8 right-8 brutalist-button !text-sm !px-6 !py-2 z-50 bg-white shadow-xl"
@@ -34,8 +34,8 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         {/* Left Column: Configuration */}
         <div className="w-full lg:w-[400px] space-y-16 lg:sticky lg:top-40 z-10">
            <header className="space-y-4">
-             <h2 className="heading-marker text-7xl text-marker-red lowercase leading-none">Four Pillars</h2>
-             <p className="handwritten text-2xl text-marker-red/60 italic">Archetypal Destiny Engine</p>
+             <h2 className="heading-marker text-7xl text-marker-red lowercase leading-none"><GlossaryTerm word="Four Pillars of Destiny">Four Pillars</GlossaryTerm></h2>
+             <p className="handwritten text-2xl text-marker-red/60 italic"><GlossaryTerm word="Archetype">Archetypal</GlossaryTerm> Destiny Engine</p>
              <div className="w-20 h-1 bg-marker-red/20 marker-border"></div>
            </header>
            
@@ -90,34 +90,34 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="flex flex-col md:flex-row justify-between items-center md:items-end border-b-2 border-marker-black/5 pb-10 gap-8">
                   <div className="text-center md:text-left space-y-2">
                     <span className="handwritten text-sm text-marker-black/40 block uppercase tracking-[0.3em]">Signature Archetype</span>
-                    <div className="text-6xl md:text-7xl heading-marker text-marker-blue leading-none">Day Master: {result.dayMaster}</div>
+                    <div className="text-5xl md:text-7xl heading-marker text-marker-blue leading-none break-words"><GlossaryTerm word="Day Master">Day Master</GlossaryTerm>: {result.dayMaster}</div>
                   </div>
                   <div className="flex items-center gap-4">
                      <ReadAloudButton text={`${result.densityProfile} ${result.thermodynamicLogic}`} className="!py-2 !px-4 bg-marker-blue/10 border-marker-blue/20" label="Read Profile" />
                      <div className="bg-marker-green/10 px-6 py-3 marker-border border-marker-green/20">
-                       <span className="handwritten text-xl text-marker-green font-bold uppercase tracking-widest">Alignment Stable</span>
+                       <span className="handwritten text-lg md:text-xl text-marker-green font-bold uppercase tracking-widest">Stable</span>
                      </div>
                   </div>
                 </div>
 
                 {/* The Pillars Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                   {result.pillars.map((p: any, i: number) => (
                     <button 
                       key={i} 
                       onClick={() => setSelectedPillarIndex(i)}
-                      className={`group relative bg-white/40 p-8 flex flex-col items-center text-center gap-6 transition-all marker-border ${
+                      className={`group relative bg-white/40 p-6 md:p-8 flex flex-col items-center text-center gap-4 md:gap-6 transition-all marker-border ${
                         selectedPillarIndex === i 
                         ? 'border-marker-blue ring-4 ring-marker-blue/5 scale-105 z-10' 
                         : 'border-marker-black/10 hover:border-marker-blue/40 hover:scale-[1.02]'
                       }`}
                     >
-                       <span className="handwritten text-sm text-marker-black/30 uppercase tracking-[0.2em]">{p.type}</span>
+                       <span className="handwritten text-[10px] md:text-sm text-marker-black/30 uppercase tracking-[0.2em]">{p.type}</span>
                        <div className="space-y-1">
-                          <div className="text-6xl heading-marker text-marker-black leading-none group-hover:text-marker-blue transition-colors">{p.stem}</div>
-                          <div className="text-4xl heading-marker text-marker-black/20 leading-none">{p.branch}</div>
+                          <div className="text-5xl md:text-6xl heading-marker text-marker-black leading-none group-hover:text-marker-blue transition-colors">{p.stem}</div>
+                          <div className="text-3xl md:text-4xl heading-marker text-marker-black/20 leading-none">{p.branch}</div>
                        </div>
-                       <div className="handwritten text-base text-marker-blue/60 font-bold uppercase tracking-tighter">{p.tenGod}</div>
+                       <div className="handwritten text-xs md:text-base text-marker-blue/60 font-bold uppercase tracking-tighter truncate w-full">{p.tenGod}</div>
                        {selectedPillarIndex === i && (
                          <div className="absolute -bottom-2 w-1/2 h-1 bg-marker-blue rounded-full"></div>
                        )}
@@ -127,8 +127,8 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 {/* Expanded Detail Section */}
                 {selectedPillarIndex !== null && (
-                  <div className="p-10 md:p-16 marker-border border-marker-blue bg-white/70 shadow-2xl animate-in zoom-in-95 duration-500 relative overflow-hidden">
-                     <div className="absolute top-0 right-0 p-8">
+                  <div className="p-8 md:p-16 marker-border border-marker-blue bg-white/70 shadow-2xl animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                     <div className="absolute top-0 right-0 p-4 md:p-8">
                         <button 
                           onClick={() => setSelectedPillarIndex(null)} 
                           className="handwritten text-xl text-marker-red font-bold hover:scale-110 transition-transform flex items-center gap-2"
@@ -137,24 +137,24 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </button>
                      </div>
 
-                     <div className="space-y-12">
-                        <header className="flex justify-between items-end">
+                     <div className="space-y-8 md:space-y-12">
+                        <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                            <div>
                               <span className="handwritten text-sm text-marker-blue/40 block mb-2 uppercase tracking-[0.4em]">Deep Interpretation</span>
-                              <h4 className="heading-marker text-5xl text-marker-black lowercase">{result.pillars[selectedPillarIndex].type} Pillar Dynamics</h4>
+                              <h4 className="heading-marker text-4xl md:text-5xl text-marker-black lowercase">{result.pillars[selectedPillarIndex].type} Pillar</h4>
                            </div>
                            <ReadAloudButton text={result.pillars[selectedPillarIndex].personalExplanation} className="!py-2 !px-4 bg-marker-blue/10 border-marker-blue/20" />
                         </header>
 
-                        <div className="flex flex-col md:flex-row gap-12 items-center">
-                           <div className="flex flex-col items-center justify-center p-10 marker-border border-marker-blue/10 bg-white/50 min-w-[200px]">
-                              <div className="text-9xl heading-marker text-marker-black leading-none mb-2">{result.pillars[selectedPillarIndex].stem}</div>
-                              <div className="text-6xl heading-marker text-marker-black/10 leading-none">{result.pillars[selectedPillarIndex].branch}</div>
-                              <div className="w-full h-px bg-marker-blue/20 my-8"></div>
-                              <div className="handwritten text-2xl text-marker-blue font-bold uppercase tracking-[0.2em]">{result.pillars[selectedPillarIndex].tenGod}</div>
+                        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
+                           <div className="flex flex-col items-center justify-center p-8 md:p-10 marker-border border-marker-blue/10 bg-white/50 min-w-[150px] md:min-w-[200px]">
+                              <div className="text-7xl md:text-9xl heading-marker text-marker-black leading-none mb-2">{result.pillars[selectedPillarIndex].stem}</div>
+                              <div className="text-5xl md:text-6xl heading-marker text-marker-black/10 leading-none">{result.pillars[selectedPillarIndex].branch}</div>
+                              <div className="w-full h-px bg-marker-blue/20 my-6 md:my-8"></div>
+                              <div className="handwritten text-xl md:text-2xl text-marker-blue font-bold uppercase tracking-[0.2em]">{result.pillars[selectedPillarIndex].tenGod}</div>
                            </div>
                            <div className="flex-1">
-                              <p className="handwritten text-3xl md:text-4xl italic text-marker-black leading-relaxed">
+                              <p className="handwritten text-2xl md:text-3xl md:text-4xl italic text-marker-black leading-relaxed">
                                  "{result.pillars[selectedPillarIndex].personalExplanation}"
                               </p>
                            </div>
@@ -166,20 +166,20 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {/* Elemental / Ten Gods Report */}
                 <div className="space-y-10 pt-10">
                   <div className="flex items-center gap-6">
-                    <span className="handwritten text-xl text-marker-black/30 uppercase tracking-[0.4em] italic shrink-0">Elemental Vectors</span>
+                    <span className="handwritten text-lg md:text-xl text-marker-black/30 uppercase tracking-[0.4em] italic shrink-0"><GlossaryTerm word="Ten Gods">Elemental Vectors</GlossaryTerm></span>
                     <div className="h-px bg-marker-black/5 flex-grow"></div>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-6">
                     {result.tenGodsAnalysis.map((god: any, idx: number) => (
-                      <div key={idx} className="p-10 marker-border border-marker-black/5 bg-white/30 flex flex-col md:flex-row gap-10 hover:border-marker-blue/20 transition-all group">
+                      <div key={idx} className="p-8 md:p-10 marker-border border-marker-black/5 bg-white/30 flex flex-col md:flex-row gap-6 md:gap-10 hover:border-marker-blue/20 transition-all group">
                         <div className="md:w-1/4 space-y-2">
                           <span className="handwritten text-xs text-marker-blue/40 font-bold block uppercase tracking-widest">Potential Node 0{idx+1}</span>
                           <span className="heading-marker text-4xl md:text-5xl text-marker-black leading-none group-hover:text-marker-blue transition-colors">{god.name}</span>
                         </div>
                         <div className="flex-1 space-y-4">
                            <span className="handwritten text-sm text-marker-black/20 italic block tracking-widest">Structural Reference: [{god.vector}]</span>
-                           <p className="handwritten text-2xl md:text-3xl text-marker-black/60 italic leading-relaxed">"{god.implication}"</p>
+                           <p className="handwritten text-xl md:text-3xl text-marker-black/60 italic leading-relaxed">"{god.implication}"</p>
                         </div>
                       </div>
                     ))}
@@ -188,14 +188,14 @@ const BaziTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 {/* Synthesis Footer */}
                 <div className="pt-16 pb-12">
-                  <div className="p-16 text-center marker-border border-marker-green/30 bg-white/20 group relative overflow-hidden">
+                  <div className="p-8 md:p-16 text-center marker-border border-marker-green/30 bg-white/20 group relative overflow-hidden">
                      <div className="absolute inset-0 bg-marker-green/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                      <div className="relative z-10 space-y-6">
-                       <div className="handwritten text-xl text-marker-green font-bold uppercase tracking-[0.5em] italic">Stationary Conclusion</div>
-                       <p className="heading-marker text-5xl md:text-7xl text-marker-black lowercase leading-tight group-hover:scale-[1.01] transition-transform">
+                       <div className="handwritten text-lg md:text-xl text-marker-green font-bold uppercase tracking-[0.5em] italic">Stationary Conclusion</div>
+                       <p className="heading-marker text-4xl md:text-7xl text-marker-black lowercase leading-tight group-hover:scale-[1.01] transition-transform">
                          {result.densityProfile || "Pattern Harmony Established."}
                        </p>
-                       <div className="handwritten text-2xl text-marker-black/40 italic max-w-2xl mx-auto pt-4 border-t border-marker-black/5">
+                       <div className="handwritten text-xl md:text-2xl text-marker-black/40 italic max-w-2xl mx-auto pt-4 border-t border-marker-black/5">
                          {result.thermodynamicLogic}
                        </div>
                      </div>

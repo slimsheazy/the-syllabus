@@ -38,8 +38,8 @@ const FlyingStarTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="w-full flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
         <div className="flex-1 w-full space-y-12">
            <header className="space-y-2">
-             <h2 className="heading-marker text-6xl text-marker-teal lowercase">Flying Star</h2>
-             <p className="handwritten text-xl text-marker-teal opacity-60">Spatial Feng Shui</p>
+             <h2 className="heading-marker text-6xl text-marker-teal lowercase"><GlossaryTerm word="Flying Star">Flying Star</GlossaryTerm></h2>
+             <p className="handwritten text-xl text-marker-teal opacity-60">Spatial <GlossaryTerm word="Feng Shui">Feng Shui</GlossaryTerm></p>
            </header>
            
            <div className="space-y-12">

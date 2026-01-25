@@ -12,6 +12,28 @@ const GLYPHS: Record<string, string> = {
   'Ascendant': 'AC', 'Midheaven': 'MC'
 };
 
+const CITIES = [
+  { name: "Auto-Fill City...", lat: null, lng: null },
+  { name: "New York, USA", lat: 40.7128, lng: -74.0060 },
+  { name: "London, UK", lat: 51.5074, lng: -0.1278 },
+  { name: "Tokyo, Japan", lat: 35.6762, lng: 139.6503 },
+  { name: "Los Angeles, USA", lat: 34.0522, lng: -118.2437 },
+  { name: "Sydney, Australia", lat: -33.8688, lng: 151.2093 },
+  { name: "Paris, France", lat: 48.8566, lng: 2.3522 },
+  { name: "Berlin, Germany", lat: 52.5200, lng: 13.4050 },
+  { name: "Mexico City, Mexico", lat: 19.4326, lng: -99.1332 },
+  { name: "Mumbai, India", lat: 19.0760, lng: 72.8777 },
+  { name: "Beijing, China", lat: 39.9042, lng: 116.4074 },
+  { name: "Cairo, Egypt", lat: 30.0444, lng: 31.2357 },
+  { name: "Rio de Janeiro, Brazil", lat: -22.9068, lng: -43.1729 },
+  { name: "Moscow, Russia", lat: 55.7558, lng: 37.6173 },
+  { name: "Dubai, UAE", lat: 25.2048, lng: 55.2708 },
+  { name: "Singapore", lat: 1.3521, lng: 103.8198 },
+  { name: "Toronto, Canada", lat: 43.6510, lng: -79.3470 },
+  { name: "Chicago, USA", lat: 41.8781, lng: -87.6298 },
+  { name: "San Francisco, USA", lat: 37.7749, lng: -122.4194 }
+];
+
 const ChartWheel: React.FC<{ ascendant: number, planets: any[], aspects: any[] }> = ({ ascendant, planets, aspects }) => {
   const size = 320;
   const center = size / 2;
@@ -124,17 +146,41 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [question, setQuestion] = useState('');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
-  const { recordCalculation } = useSyllabusStore();
+  const [showLocationEdit, setShowLocationEdit] = useState(false);
+  
+  const { recordCalculation, userLocation, setUserLocation } = useSyllabusStore();
+  const [location, setLocation] = useState<{ lat: number, lng: number } | null>(userLocation);
 
   useEffect(() => {
-    if ("geolocation" in navigator) {
+    // Only attempt Geolocation if we don't have a location set yet
+    if (!userLocation && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (pos) => {
+           const newLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+           setLocation(newLoc);
+           setUserLocation(newLoc);
+        },
         (err) => console.warn("Geolocation denied.")
       );
     }
-  }, []);
+  }, [setUserLocation, userLocation]);
+
+  const handleCitySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = CITIES.find(c => c.name === e.target.value);
+    if (selected && selected.lat !== null && selected.lng !== null) {
+      const newLoc = { lat: selected.lat, lng: selected.lng };
+      setLocation(newLoc);
+      setUserLocation(newLoc); // Update global store for other tools
+    }
+  };
+
+  const handleManualLocationChange = (type: 'lat'|'lng', val: string) => {
+    const num = parseFloat(val);
+    setLocation(prev => {
+        const next = prev ? { ...prev } : { lat: 0, lng: 0 };
+        return { ...next, [type]: isNaN(num) ? 0 : num };
+    });
+  };
 
   const handleCast = async () => {
     if (!question.trim()) return;
@@ -163,8 +209,8 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="w-full flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
         <div className="w-full lg:w-[45%] space-y-12">
            <header className="space-y-4">
-             <h1 className="heading-marker text-8xl text-marker-teal lowercase">electional finder</h1>
-             <p className="handwritten text-2xl text-marker-black font-extrabold uppercase tracking-widest">Optimal timing selection</p>
+             <h1 className="heading-marker text-8xl text-marker-teal lowercase"><GlossaryTerm word="Electional Astrology">electional</GlossaryTerm> finder</h1>
+             <p className="handwritten text-2xl text-marker-black font-extrabold uppercase tracking-widest">Optimal <GlossaryTerm word="Timing">timing</GlossaryTerm> selection</p>
            </header>
            
            <div className="space-y-16 flex flex-col items-center">
@@ -182,6 +228,41 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              </div>
 
              <div className="w-full space-y-8">
+                <div className="w-full flex flex-col items-center gap-2">
+                   <div className="flex items-center gap-2">
+                      <span className="handwritten text-xs font-bold text-marker-black/40 uppercase tracking-widest">Location Vector</span>
+                      <button onClick={() => setShowLocationEdit(!showLocationEdit)} className="text-xs font-bold text-marker-teal hover:underline decoration-2">
+                        {showLocationEdit ? 'Done' : 'Adjust'}
+                      </button>
+                   </div>
+                   
+                   {showLocationEdit ? (
+                     <div className="w-full max-w-sm p-4 bg-white/60 marker-border border-marker-black/10 space-y-3 animate-in slide-in-from-top-2">
+                         <select className="w-full p-2 bg-transparent marker-border border-marker-black/20 text-sm font-bold" onChange={handleCitySelect}>
+                           {CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                         </select>
+                         <div className="flex gap-2">
+                           <input 
+                             type="number" placeholder="Lat" step="0.0001" 
+                             value={location?.lat || ''} 
+                             onChange={e => handleManualLocationChange('lat', e.target.value)}
+                             className="w-full p-2 bg-transparent marker-border border-marker-black/20 text-sm font-mono text-center"
+                           />
+                           <input 
+                             type="number" placeholder="Lng" step="0.0001" 
+                             value={location?.lng || ''} 
+                             onChange={e => handleManualLocationChange('lng', e.target.value)}
+                             className="w-full p-2 bg-transparent marker-border border-marker-black/20 text-sm font-mono text-center"
+                           />
+                         </div>
+                     </div>
+                   ) : (
+                     <span className="handwritten text-xl font-bold text-marker-black/60">
+                       {location ? `${location.lat.toFixed(3)}N / ${location.lng.toFixed(3)}E` : 'Calibrating GPS...'}
+                     </span>
+                   )}
+                </div>
+
                 <button 
                     onClick={handleCast} 
                     disabled={loading} 
@@ -198,7 +279,7 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
            {loading ? (
              <div className="flex flex-col items-center justify-center h-full gap-8 py-32">
                 <div className="w-24 h-24 border-8 border-marker-blue border-t-transparent animate-spin rounded-full"></div>
-                <span className="handwritten text-3xl text-marker-blue font-black animate-pulse italic uppercase tracking-widest">Searching Timeline...</span>
+                <span className="handwritten text-3xl text-marker-blue font-black animate-pulse italic uppercase tracking-widest">Searching <GlossaryTerm word="Timeline">Timeline</GlossaryTerm>...</span>
              </div>
            ) : result ? (
              <div className="w-full space-y-12 animate-in fade-in duration-500 pb-20">
@@ -215,7 +296,7 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
                 
                 <div className="flex flex-col items-center py-6">
-                   <span className="handwritten text-2xl text-marker-black font-black italic mb-4 uppercase tracking-tighter">Temporal Matrix</span>
+                   <span className="handwritten text-2xl text-marker-black font-black italic mb-4 uppercase tracking-tighter"><GlossaryTerm word="Temporal">Temporal Matrix</GlossaryTerm></span>
                    <ChartWheel ascendant={result.chartData.ascendant} planets={result.chartData.planets} aspects={result.chartData.aspects} />
                 </div>
                 
@@ -226,7 +307,7 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div key={idx} className="flex justify-between items-center border-b-4 border-marker-black/5 pb-6 last:border-0">
                           <div className="text-3xl">
                             <span className="font-black text-marker-black">{asp.p1}</span>{' '}
-                            <span className="text-marker-blue italic font-black uppercase">{asp.type}</span>{' '}
+                            <span className="text-marker-blue italic font-black uppercase"><GlossaryTerm word={asp.type}>{asp.type}</GlossaryTerm></span>{' '}
                             <span className="font-black text-marker-black">{asp.p2}</span>
                             <div className="text-sm font-black text-marker-black/60 uppercase mt-2">14°11' cancer</div>
                           </div>
@@ -241,8 +322,8 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              </div>
            ) : (
              <div className="text-center opacity-5 flex flex-col items-center justify-center h-full py-40 select-none">
-                <div className="text-[16rem] heading-marker text-marker-black leading-none">VOID</div>
-                <p className="handwritten text-5xl font-black mt-4 uppercase">awaiting alignment...</p>
+                <div className="text-[16rem] heading-marker text-marker-black leading-none"><GlossaryTerm word="Void">VOID</GlossaryTerm></div>
+                <p className="handwritten text-5xl font-black mt-4 uppercase">awaiting <GlossaryTerm word="Alignment">alignment</GlossaryTerm>...</p>
              </div>
            )}
         </div>

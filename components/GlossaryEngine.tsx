@@ -24,18 +24,34 @@ export const GlossaryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Direct DOM manipulation for high-performance cursor tracking
   const updatePosition = useCallback((x: number, y: number) => {
     if (tooltipRef.current) {
-      const offsetX = 24;
-      const offsetY = 24;
+      const offsetX = 20;
+      const offsetY = 20;
       
+      // Calculate proposed position
       let left = x + offsetX;
       let top = y + offsetY;
       
-      // Viewport boundary detection
-      if (left + 340 > window.innerWidth) {
-        left = x - 350; // Flip to left side of cursor
+      // Screen boundaries
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const tooltipWidth = Math.min(340, screenWidth - 20); // Responsive width cap
+      const tooltipHeight = tooltipRef.current.offsetHeight || 200; // Est height if not rendered yet
+
+      // Horizontal Flip/Shift
+      if (left + tooltipWidth > screenWidth) {
+        // Try flipping to left
+        left = x - tooltipWidth - offsetX;
+        
+        // If left side is also off-screen, just center it roughly or clamp
+        if (left < 10) {
+           left = Math.max(10, screenWidth - tooltipWidth - 10);
+        }
       }
-      if (top + 250 > window.innerHeight) {
-        top = y - 260; // Flip to above cursor
+
+      // Vertical Flip/Shift
+      if (top + tooltipHeight > screenHeight) {
+        top = y - tooltipHeight - offsetY;
+        if (top < 10) top = 10;
       }
 
       tooltipRef.current.style.left = `${left}px`;
@@ -101,7 +117,7 @@ export const GlossaryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       <div 
         ref={tooltipRef}
-        className="fixed z-[9999] pointer-events-auto transition-opacity duration-300 ease-out"
+        className="fixed z-[9999] pointer-events-auto transition-opacity duration-300 ease-out max-w-[92vw] w-[340px]"
         style={{ 
           opacity: isVisible ? 1 : 0,
           visibility: isVisible ? 'visible' : 'hidden',
@@ -110,9 +126,10 @@ export const GlossaryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }}
         onMouseEnter={cancelHide}
         onMouseLeave={hideInspector}
+        onTouchStart={cancelHide} // Keep open on touch interaction
       >
         {activeTerm && (
-           <div className="w-[340px] backdrop-blur-xl bg-white/95 border border-white/50 shadow-[0_8px_32px_rgba(15,23,42,0.15)] rounded-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+           <div className="w-full backdrop-blur-xl bg-white/95 border border-white/50 shadow-[0_8px_32px_rgba(15,23,42,0.15)] rounded-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
               
               {/* Decorative Top Shine */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-marker-blue/0 via-marker-blue/30 to-marker-blue/0"></div>
@@ -122,14 +139,14 @@ export const GlossaryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     <div className="handwritten text-[10px] uppercase tracking-[0.2em] text-marker-blue/70 font-bold mb-1 flex items-center gap-2">
                        <span>{activeTerm.etymology || 'Lexicon'}</span>
                     </div>
-                    <h4 className="heading-marker text-3xl text-marker-black lowercase leading-none">
+                    <h4 className="heading-marker text-3xl text-marker-black lowercase leading-none break-words">
                        {activeTerm.word}
                     </h4>
                  </div>
                  
                  <button 
                    onClick={handleCopy}
-                   className="p-2 hover:bg-marker-black/5 rounded-xl transition-all group active:scale-95"
+                   className="p-2 hover:bg-marker-black/5 rounded-xl transition-all group active:scale-95 shrink-0"
                    title="Copy Definition"
                  >
                    {copied ? (
@@ -177,13 +194,13 @@ export const GlossaryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           z-index: -1;
         }
 
-        .glossary-term:hover {
+        .glossary-term:hover, .glossary-term:active {
           color: var(--marker-blue);
           border-bottom-color: transparent;
           text-shadow: 0 0 20px rgba(30, 58, 138, 0.2);
         }
         
-        .glossary-term:hover::after {
+        .glossary-term:hover::after, .glossary-term:active::after {
            transform: scale(1);
            opacity: 1;
         }
@@ -218,6 +235,7 @@ export const GlossaryTerm: React.FC<{ word: string, children: React.ReactNode }>
       onMouseMove={handleMouseMove}
       onMouseLeave={hideInspector}
       onTouchStart={(e) => {
+        // e.preventDefault(); // Optional: might block scrolling if used
         const touch = e.touches[0];
         cancelHide();
         updatePosition(touch.clientX, touch.clientY);
