@@ -215,15 +215,12 @@ const ElectionalTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
            
            <div className="space-y-16 flex flex-col items-center">
              <div className="relative w-full text-center">
-               <div className="handwritten text-4xl text-marker-black font-black italic mb-8 border-b-4 border-marker-black/10 inline-block px-4 min-h-[60px]">
-                 {question}
-               </div>
-               
                <textarea 
                  value={question}
                  onChange={(e) => setQuestion(e.target.value)}
                  placeholder="Enter your intent..."
-                 className="w-full bg-transparent border-none focus:ring-0 text-center text-marker-black text-3xl font-black min-h-[120px] italic placeholder:opacity-40"
+                 className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-center text-marker-black text-4xl font-black min-h-[120px] italic placeholder:opacity-40 border-b-4 border-marker-black/10 pb-4 resize-none placeholder:text-marker-black font-marker"
+                 rows={3}
                />
              </div>
 

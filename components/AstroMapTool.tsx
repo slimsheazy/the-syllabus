@@ -67,7 +67,7 @@ const AstroMapTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       <div className="flex flex-col h-screen lg:flex-row">
         {/* Left Panel: Controls & Analysis */}
-        <div className="w-full lg:w-[400px] h-1/3 lg:h-full bg-white z-[900] overflow-y-auto custom-scrollbar flex flex-col shadow-2xl">
+        <div className="w-full lg:w-[400px] h-1/3 lg:h-full bg-white z-[900] overflow-y-auto flex flex-col shadow-2xl">
           <div className="p-8 space-y-8 flex-grow">
             <header className="space-y-2">
                <h2 className="heading-marker text-5xl text-marker-black lowercase"><GlossaryTerm word="Astrocartography">Relocation</GlossaryTerm> Mapper</h2>

@@ -106,8 +106,8 @@ const NatalWheel: React.FC<{ data: any }> = ({ data }) => {
             
             // House Number Label
             // Approximate middle of house by looking at next house cusp
-            let nextHouse = data.houses.find((h: any) => h.house === (house.house % 12) + 1);
-            let nextSignIdx = ZODIAC_ORDER.indexOf(nextHouse.sign);
+            const nextHouse = data.houses.find((h: any) => h.house === (house.house % 12) + 1);
+            const nextSignIdx = ZODIAC_ORDER.indexOf(nextHouse.sign);
             let nextAbsDeg = (nextSignIdx * 30) + nextHouse.degree;
             if (nextAbsDeg < absDeg) nextAbsDeg += 360;
             
@@ -431,7 +431,7 @@ const BirthChartTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      <h3 className="heading-marker text-4xl text-marker-black lowercase">Major Aspects</h3>
                      <div className="h-px bg-marker-black/10 flex-grow"></div>
                    </div>
-                   <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-1">
+                   <div className="max-h-[400px] overflow-y-auto p-1">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="handwritten text-xs uppercase text-marker-black/40 tracking-widest border-b-2 border-marker-black/10">

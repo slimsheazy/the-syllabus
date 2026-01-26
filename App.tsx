@@ -155,7 +155,7 @@ const NavigationOverlay: React.FC<{
     <div className={`fixed inset-0 z-[100] transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
       <div className="absolute inset-0 bg-white/95 backdrop-blur-md" onClick={onClose} />
       <div className={`absolute top-0 left-0 h-full w-full md:w-[400px] bg-white border-r border-marker-black/10 transition-transform duration-500 shadow-2xl flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-10 pt-24 flex-grow overflow-y-auto custom-scrollbar">
+        <div className="p-10 pt-24 flex-grow overflow-y-auto">
           <div className="handwritten text-xs text-marker-black opacity-40 uppercase tracking-widest mb-10 pb-4 border-b border-marker-black/5">Syllabus Index</div>
           <div className="space-y-12">
             {MENU_CATEGORIES.map((cat, i) => (
@@ -281,8 +281,8 @@ const HomeView: React.FC<{ onEnter: () => void }> = ({ onEnter }) => {
            <div className="inline-block px-4 py-1 border border-marker-black/10 rounded-full">
               <span className="handwritten text-xs font-bold uppercase tracking-widest text-marker-black/60">Esoteric Archive v1.0</span>
            </div>
-           <h1 className="title-main text-marker-green leading-none text-[3.5rem] md:text-[6rem] lg:text-[7rem]">The Syllabus</h1>
-           <p className="handwritten text-xl text-marker-black/60 max-w-lg mx-auto leading-relaxed px-4">
+           <h1 className="title-main text-marker-green leading-none text-5xl md:text-7xl">The Syllabus</h1>
+           <p className="handwritten text-lg text-marker-black/60 max-w-lg mx-auto leading-relaxed px-4">
              An open <GlossaryTerm word="repository">repository</GlossaryTerm> of ancient frameworks and modern <GlossaryTerm word="synthesis">synthesis</GlossaryTerm>.
            </p>
         </div>

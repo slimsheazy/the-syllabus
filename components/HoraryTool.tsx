@@ -327,7 +327,7 @@ const HoraryTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 <div className="p-10 md:p-12 marker-border border-marker-red bg-white shadow-2xl space-y-8">
                    <div className="handwritten text-sm text-marker-red uppercase font-black border-b-4 border-marker-red/10 pb-2 tracking-widest">Technical Summary</div>
-                   <div className="space-y-6 max-h-[400px] overflow-y-auto custom-scrollbar pr-4">
+                   <div className="space-y-6 max-h-[400px] overflow-y-auto pr-4">
                       {result.chartData.aspects.map((asp: any, idx: number) => {
                         const p1 = result.chartData.planets.find((p: any) => p.name === asp.p1);
                         const p2 = result.chartData.planets.find((p: any) => p.name === asp.p2);
